@@ -1,0 +1,33 @@
+<!Doctype html>
+<html>
+    <head>
+        <style>
+            div{
+                background-color: teal;
+                width: 17%;        
+                padding: 10px;    
+                margin:auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <form method='post' autocomplete="off">
+                {% csrf_token %}
+                {{ form.as_p}}
+                <input type="submit" name="submit" value="Login">
+            </form>
+            <br>
+            <!--
+            <button class="btn btn-outline-info">
+                <a style="color:red" href="">
+                    <i class="fab fa-google"></i>
+                    Login with Google
+                </a>
+            </button>
+        -->
+            
+            <p>Don't have an account? <a href="{% url 'register'%}"> Register</a> </p>
+        </div>
+    </body>
+</html>

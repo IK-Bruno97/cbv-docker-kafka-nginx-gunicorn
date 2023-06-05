@@ -1,0 +1,23 @@
+<!Doctype html>
+<html>
+    <head>
+        <style>
+            div{
+                background-color: teal;
+                width: 40%;        
+                padding: 10px;    
+                margin:auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <form method='post'>
+                {{form.as_p}}
+                {%csrf_token%}
+                <input type='submit' value="submit">
+            </form>
+            
+        </div>
+    </body>
+</html>

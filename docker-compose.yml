@@ -1,0 +1,74 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    container_name: psql
+    environment:
+      - POSTGRES_DB=TestDjangoDocker
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+    ports:
+      - "5432:5432"
+    
+  web:
+    build: .
+    container_name: web
+    command: gunicorn cbv.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - ./.env.dev
+    expose:
+      - 8000
+    volumes:
+      - static_volume:/app/staticfiles
+    depends_on:
+      - db
+    
+  nginx:
+    restart: always
+    build:
+      context: ./nginxconfig
+    volumes:
+      - static_volume:/app/staticfiles
+    ports:
+      - "90:80"
+    depends_on:
+      - web
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    #command:
+    #  - /bin/sh
+    #  - -c
+    #  - |
+    #    cd /opt/kafka
+    #    ./bin/kafka-topics.sh --create --topic test-events --partitions 1 --zookeeper localhost:9092 --replication-factor 1 
+
+  kafka_manager:
+    image: hlebalbau/kafka-manager:stable
+    container_name: kafka-manager
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS : "zookeeper:2181"
+      APPLICATION_SECRET: "random-secret"
+    command: -Dpidfile.path=/dev/null
+
+volumes:
+  postgres_data:
+  static_volume:

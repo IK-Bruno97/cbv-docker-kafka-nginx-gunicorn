@@ -1,0 +1,48 @@
+<!Doctype html>
+<html>
+    <head>
+        <style>
+            div{
+                background-color: teal;
+                width: 40%;        
+                padding: 10px;    
+                margin:auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+                {% if request.user.is_authenticated %}
+                    <p>Hello {{request.user|title}}</p>
+                    <p style="margin:0">You have <i>{{count}}</i> incomplete task{{ count|pluralize:"s" }}</p>
+                    <a style="float:right;" href="{% url 'logout'%}">logout</a>
+                {%else%}
+                    <a href="{% url 'login' %}">login</a>
+                {% endif %}
+                <br>
+                <form method="get">
+                    <input type="text" value="{{search_input}}" name="search-area" placeholder="search task">
+                    <br><br>
+                    <input type="submit" value="search">
+                </form>
+
+                <div>
+  
+                    {% for task in tasks %}
+                                {% if task.complete %}
+                                <p>{{task}}   <a href="{% url 'task-update' task.id %}">&#9997;</a> </p>
+                                {% else %}
+                                <p>{{task}}   <a href="{% url 'task-update' task.id %}">&#9997;</a> <a href="{% url 'task-delete' task.id %}">&#128465;</a></p>
+                                {% endif %}
+                    {% empty %}
+                        <section>
+                            <p>You have no tasks</p>
+                            <p>Create <a href="{% url 'task-create' %}">new task!</a></p>
+                        </section>
+                    {% endfor %}
+                    <a href="{% url 'task-create'%}">Add Task</a>
+                <br>
+                
+        </div>
+    </body>
+</html>

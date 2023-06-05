@@ -1,0 +1,41 @@
+<!Doctype html>
+<html>
+    <head>
+        <style>
+            div{
+                background-color: teal;
+                width: 40%;        
+                padding: 10px;    
+                margin:auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>Register</h1>
+            {% if form.errors %}
+                <p style="color:red">Kindly verify that both passwords match and enter currect captcha</p>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                {% autoescape on %}
+                    <label>{{form.username.label}}</label><br>
+                    {{form.username}}
+                    <br><br>
+                    <label>{{form.password1.label}}</label><br>
+                    {{form.password1}}
+                    <br><br>
+                    <label>{{form.password2.label}}</label><br>
+                    {{form.password2}}
+                    <br><br>
+                    <label>{{form.captcha.label}}</label><br>
+                    {{form.captcha}}
+                {% endautoescape %}
+                <br><br>
+                <input type="submit" value="Register">
+            </form>
+            <p>Already have an account? <a href="{% url 'login'%}">login</a></p>
+        </div>
+    </body>
+</html>
