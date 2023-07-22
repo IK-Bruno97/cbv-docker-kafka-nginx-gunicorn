@@ -14,7 +14,7 @@ services:
     
   web:
     build: .
-    container_name: web
+    container_name: django
     command: gunicorn cbv.wsgi:application --bind 0.0.0.0:8000
     env_file:
       - ./.env.dev
@@ -22,6 +22,7 @@ services:
       - 8000
     volumes:
       - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     depends_on:
       - db
     
@@ -31,34 +32,74 @@ services:
       context: ./nginxconfig
     volumes:
       - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     ports:
-      - "90:80"
+      - "1337:80"
     depends_on:
       - web
 
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper
     container_name: zookeeper
+    hostname: zookeeper
+    restart: always
     ports:
       - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
 
   kafka:
     image: wurstmeister/kafka
-    container_name: kafka
+    container_name: wm_kafka
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://192.20.10.2:29092
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_BROKER_ID: 001
+
     depends_on:
       - zookeeper
-    #command:
-    #  - /bin/sh
-    #  - -c
-    #  - |
-    #    cd /opt/kafka
-    #    ./bin/kafka-topics.sh --create --topic test-events --partitions 1 --zookeeper localhost:9092 --replication-factor 1 
 
+
+  kafka2:
+    image: wurstmeister/kafka
+    container_name: wm_kafka2
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9093,OUTSIDE://192.20.10.2:29093
+      KAFKA_LISTENERS: INSIDE://:9093,OUTSIDE://:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_BROKER_ID: 002
+
+    depends_on:
+      - zookeeper
+
+
+  kafka3:
+    image: wurstmeister/kafka
+    container_name: wm_kafka3
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9094,OUTSIDE://192.20.10.2:29094
+      KAFKA_LISTENERS: INSIDE://:9094,OUTSIDE://:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_BROKER_ID: 003
+
+    depends_on:
+      - zookeeper
   kafka_manager:
     image: hlebalbau/kafka-manager:stable
     container_name: kafka-manager
@@ -68,7 +109,8 @@ services:
       ZK_HOSTS : "zookeeper:2181"
       APPLICATION_SECRET: "random-secret"
     command: -Dpidfile.path=/dev/null
-
+  
 volumes:
   postgres_data:
   static_volume:
+  media_volume:

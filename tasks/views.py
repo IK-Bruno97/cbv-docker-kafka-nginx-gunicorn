@@ -82,11 +82,11 @@ class TaskCreate(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        producer = KafkaProducer(bootstrap_servers=['host.docker.internal:9092'],
+        producer = KafkaProducer(bootstrap_servers=['172.20.10.2:29092'],
                         value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                         #partitioner=get_partition
                         )
-        producer.send('quickstart-events', form.cleaned_data)
+        producer.send('Redemption', form.cleaned_data)
         print(form.cleaned_data)
         return super(TaskCreate, self).form_valid(form)
     
